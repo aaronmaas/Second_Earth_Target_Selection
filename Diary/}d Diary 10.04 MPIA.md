@@ -39,7 +39,7 @@ tags: literture
 
 - RVs 
 	- Periodograms and activity indicators http://www.astro.physik.uni-goettingen.de/research/rvprecision/
-	-
+	 
 
 - Activity: 
 	- Stellar-activity induced RV signals: often ~1 m/s or higher!
