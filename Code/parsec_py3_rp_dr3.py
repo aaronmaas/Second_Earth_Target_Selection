@@ -14,7 +14,7 @@ import sys
 
 # Path to isochrone files
 default_isopath = '/Users/rbrahm/data/PARSEC-2/'
-default_isopath = 'PARSEC-2/'
+default_isopath = 'PARSEC_2/'
 
 def mag_to_flux(mag,name):
 	dct = {'Johnson_B':6.491e-9,
@@ -67,7 +67,7 @@ def flux_to_mag(flux,name):
 		   'W4':4.507e-15,
 	}
 	# Compute magnitude from flux
-	mag = -2.5*np.log10(flux/dct[name]) 
+	mag = -2.5*np.log10(flux/dct[name])
 	# Return the magnitude
 	return mag
 
@@ -81,7 +81,7 @@ def rhostar(M,R):
 	R (float): stellar radius in Rsun units
 
 	Returns:
-	rho (float): stellar density in cgs units 
+	rho (float): stellar density in cgs units
 	"""
 	rho = M*cons.M_sun.cgs.value/(4.*np.pi*(R*cons.R_sun.cgs.value)**3/3.)
 	return rho
@@ -89,7 +89,7 @@ def rhostar(M,R):
 def loggtoRs(logg,Ms):
 	"""
 	Compute stellar radius from surface gravity and mass.
-	
+
 	Parameters:
 	logg (float): log of the stellar surface gravity
 	Ms (float): stellar mass in Msun units
@@ -109,7 +109,7 @@ def loggtoRs(logg,Ms):
 def FEHtoZ(FEH,Zsun=0.0152):
 	"""
 	Convert Fe/H to Z (metal mass fraction).
-	
+
 	Parameters:
 	FEH (float): stellar metallicity
 	Zsun (float): solar Z
@@ -134,7 +134,7 @@ def stringed(Z):
 	"""
 	Convert Z isochrone value back into key string
 	Necessary because prior float conversion strips right zeroes.
-	
+
 	Parameters:
 	Z (float): Z isochrone key value previously converted to float
 
@@ -156,7 +156,7 @@ def stringed(Z):
 
 def make_dct(isopath=default_isopath):
 	Zs = get_Zs(isopath=isopath)
-	
+
 	#avs = ['0.2','0.4','0.6','0.8','1.0']
 	avs = ['1.0']
 	dct = {}
@@ -189,7 +189,7 @@ def make_dct(isopath=default_isopath):
 					if tage != -999:
 						dct[sZ][str(tage)]['imass'] = np.array(imass)
 						dct[sZ][str(tage)]['mass'] = np.array(mass)
-						dct[sZ][str(tage)]['logL'] = np.array(logL) 
+						dct[sZ][str(tage)]['logL'] = np.array(logL)
 						dct[sZ][str(tage)]['logT'] = np.array(logT)
 						dct[sZ][str(tage)]['logg'] = np.array(logg)
 						dct[sZ][str(tage)]['Gmag_0.0'] = np.array(Gmag)
@@ -258,7 +258,7 @@ def make_dct(isopath=default_isopath):
 
 		dct[sZ][str(tage)]['imass'] = np.array(imass)
 		dct[sZ][str(tage)]['mass'] = np.array(mass)
-		dct[sZ][str(tage)]['logL'] = np.array(logL) 
+		dct[sZ][str(tage)]['logL'] = np.array(logL)
 		dct[sZ][str(tage)]['logT'] = np.array(logT)
 		dct[sZ][str(tage)]['logg'] = np.array(logg)
 		dct[sZ][str(tage)]['Gmag_0.0'] = np.array(Gmag)
@@ -339,9 +339,9 @@ def trilinear(x,y,z,x0,x1,y0,y1,z0,z1,c000,c100,c010,c001,c110,c011,c101,c111):
 
 def bilinear(x,y,x0,x1,y0,y1,q11,q21,q12,q22):
 	"""
-	Perform a bilinear interpolation of a function f(x,y), 
+	Perform a bilinear interpolation of a function f(x,y),
 	given four coordinates and corresponding f values.
-	
+
 	Parameters:
 	x (float): x coordinate at which to interpolate the function
 	y(float): y coordinate at which to interpolate the function
@@ -380,7 +380,7 @@ def bilinear(x,y,x0,x1,y0,y1,q11,q21,q12,q22):
 		# return the value at the point
 		return q11
 
-	# if x coords are the same but y coords differ		
+	# if x coords are the same but y coords differ
 	elif x1 == x0 and y1 != y0:
 		# do linear interpolation in y
 		m = (q11 - q12) / (y1 - y0)
@@ -556,7 +556,7 @@ def lnprior(theta):
 		if 0.05 < AGE < 20 and 0.4 < MASS < 4.5  and 0.0 < Av < 2.:
 			# if yes return zero
 			return 0.0
-	
+
 	# if the parameters are not within the constraints return -infinity
 	return -np.inf
 
@@ -575,7 +575,7 @@ def lnlike(theta, y, yerr,isopath=default_isopath):
 	"""
 
 	#print(theta)
-	# check if metallicity is being fitted	
+	# check if metallicity is being fitted
 	if feh_free:
 		# split age, mass, Av, FE/H from theta
 		AGE, MASS, Av, feh2 = theta
@@ -612,7 +612,7 @@ def lnlike(theta, y, yerr,isopath=default_isopath):
 		# calculate values TODO what are these?
 		m = (out[band+'_'+str(av2)] - out[band+'_'+str(av1)]) / float(av2-av1)
 		n = out[band+'_'+str(av2)] - m * av2
-		ys = 10**(-0.2*(m*Av + n)) 
+		ys = 10**(-0.2*(m*Av + n))
 		# add values to model
 		model = np.hstack((model,np.array([ys])))
 	# compute inverse of the error
@@ -637,7 +637,7 @@ def lnlike(theta, y, yerr,isopath=default_isopath):
 def lnprob(theta, y, yerr):
 	"""
 	Define the posterior probability for the emcee sampler.
-	(emcee doc) A function that takes a vector in the parameter space as input 
+	(emcee doc) A function that takes a vector in the parameter space as input
 	and returns the natural logarithm of the posterior probability (up to an
 	additive constant) for that position.
 
@@ -685,7 +685,7 @@ def get_sum(vec):
 def get_mags_2mass(RA,DEC,band):
 	"""
 	Get 2MASS magnitudes in a band from Vizier using input coordinates
-	
+
 	Parameters:
 	RA (float): the right ascension
 	DEC (float): the declination
@@ -706,7 +706,7 @@ def get_mags_2mass(RA,DEC,band):
 	dist1 = np.sin(np.deg2rad(dat['DEJ2000']))*np.sin(np.deg2rad(DEC))
 	dist2 = np.cos(np.deg2rad(dat['DEJ2000']))*np.cos(np.deg2rad(DEC))
 	dist3 = np.cos(np.deg2rad(dat['RAJ2000'])-np.deg2rad(RA))
-	dist = np.arccos(dist1 + dist2 * dist3) 
+	dist = np.arccos(dist1 + dist2 * dist3)
 	# Get the closest result to the input coordinates
 	imin = np.argmin(dist)
 	dat = dat[imin]
@@ -735,7 +735,7 @@ def get_mass(Ms, P, e, K, i):
 	# define constants
 	G = cons.G.cgs.value
 	Mjup = cons.M_jup.cgs.value
-	Msun = cons.M_sun.cgs.value 
+	Msun = cons.M_sun.cgs.value
 
 	# create initial array of masses from 0.0001 to 100 MJ
 	masses = np.arange(0.0001,100.,0.1)*Mjup
@@ -762,7 +762,7 @@ def get_teq(L,e,a,A=0.,beta=0.5,eps=1.):
 	a (float): orbital semi-major axis
 	A (float): planet bond albedo
 	beta (float): heat distribution
-	eps (float): emissivity 
+	eps (float): emissivity
 
 	Returns:
 	(float): equilibrium temperature
@@ -785,7 +785,7 @@ def runit(obname,isopath=default_isopath, fehfree=False, pars_path='pars/'):
 	par_path (str): path to stellar files
 
 	Returns:
-	(to screen and pkl file): imass, age, mass, Teff, logg, radius, rho, Av, 
+	(to screen and pkl file): imass, age, mass, Teff, logg, radius, rho, Av,
 								  Fe/H median values and 1-sigma error bars
 	"""
 
@@ -912,7 +912,7 @@ def runit(obname,isopath=default_isopath, fehfree=False, pars_path='pars/'):
 			pos.append(np.array([vala,valm,valv,valf]))
 		else:
 			pos.append(np.array([vala,valm,valv]))
-		
+
 	# Instantiate the emcee sampler
 	sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(data, error))
 	# iterate the mcmc over 10000 iterations
@@ -1068,7 +1068,7 @@ def trunc(val,force=-999):
 
 def planet_props(star_sample, juliet_samples, connect_rho=False,mps=False,smf=1.4):
 	"""
-	Compute planet parameters from juliet planet fit posteriors and 
+	Compute planet parameters from juliet planet fit posteriors and
 	parsec stellar parameters posteriors.
 
 	Parameters:
@@ -1082,13 +1082,13 @@ def planet_props(star_sample, juliet_samples, connect_rho=False,mps=False,smf=1.
 	(to screen): Mp, Rp, a, Teq values
 	"""
 	#dp = pickle.load(open(juliet_samples))
-	# load the juliet planet fit posteriors	
+	# load the juliet planet fit posteriors
 	with open(juliet_samples, 'rb') as f:
 		dp = pickle.load(f, encoding = 'latin1')
 
 	# Check if the fit used the Espinoza 18 r1,r2 parametrization
 	if 'pu' in dp.keys():
-		# get the maximum planet-to-star radius ratio 
+		# get the maximum planet-to-star radius ratio
 		pu = dp['pu']
 		# get the smallest planet-to-star radius ratio
 		pl = dp['pl']
@@ -1108,7 +1108,7 @@ def planet_props(star_sample, juliet_samples, connect_rho=False,mps=False,smf=1.
 	if 'a_p' in dp.keys() or 'rho' in dp.keys():
 		rv_only = False
 	else:
-		rv_only = True	
+		rv_only = True
 
 	# load the parsec stellar parameters posteriors
 	ds = pickle.load(open(star_sample, 'rb'), encoding = 'latin1')
@@ -1121,12 +1121,12 @@ def planet_props(star_sample, juliet_samples, connect_rho=False,mps=False,smf=1.
 	age	 = ds['age']
 	# create indices array
 	I=np.arange(len(mstar))
-	# select indices 
+	# select indices
 	#I = np.where((age<5.3)&(mstar>1.2))[0]
-	# cut parameter arrays to I indices 
+	# cut parameter arrays to I indices
 	# (currently no effect as no filter on I)
 	mstar,rstar,rhostar,lstar,age = mstar[I],rstar[I],rhostar[I],lstar[I],age[I]
-	# get standard deviation of stellar masses	
+	# get standard deviation of stellar masses
 	devmstar = np.sqrt(np.var(mstar))
 	# add random gaussian noise to masses using std-dev and smf factor
 	mstar = mstar + np.random.normal(0,smf*devmstar,len(mstar))
@@ -1138,7 +1138,7 @@ def planet_props(star_sample, juliet_samples, connect_rho=False,mps=False,smf=1.
 	fms,ms1,ms2 = get_sum(mstar)
 	# get rounded values and decimal positions rounded to for error bars
 	ms1,t1 = trunc(ms1)
-	ms2,t2 = trunc(ms2) 
+	ms2,t2 = trunc(ms2)
 	# round median mass to maximum number of decimals kept for error bars
 	fms = trunc(fms,force=max(t1,t2))
 	# print rounded mass and error bars
@@ -1213,7 +1213,7 @@ def planet_props(star_sample, juliet_samples, connect_rho=False,mps=False,smf=1.
 
 		# check if the fit included light curves
 		if not rv_only:
-			# check if the scaled semi-major axis a/Rs was fitted		
+			# check if the scaled semi-major axis a/Rs was fitted
 			if 'a_p'+str(plt) in dp.keys():
 				# if yes obtain it from dict
 				a = dp['a_p'+str(plt)]
@@ -1260,7 +1260,7 @@ def planet_props(star_sample, juliet_samples, connect_rho=False,mps=False,smf=1.
 			else:
 				p = dp['p_p'+str(plt)]
 				b = dp['b_p'+str(plt)]
-			
+
 			# compute the orbital inclination
 			inc = np.arccos(b/a)
 
@@ -1290,7 +1290,7 @@ def planet_props(star_sample, juliet_samples, connect_rho=False,mps=False,smf=1.
 			else:
 				# shuffle all parsec indices
 				i2 = np.random.randint(len(rstar))
-			
+
 			# use the i-th planet posteriors and the random i2 star posteriors
 			# get the planet mass for this (i,i2) set
 			MP = get_mass(mstar[i2],P[i],e[i],K[i],inc[i])#*cons.M_jup.cgs.value
@@ -1302,7 +1302,7 @@ def planet_props(star_sample, juliet_samples, connect_rho=False,mps=False,smf=1.
 			else:
 				# get the semi-major axis for this (i, i2) set if RV-only
 				# get cgs constants
-				Msun = cons.M_sun.cgs.value 
+				Msun = cons.M_sun.cgs.value
 				G = cons.G.cgs.value
 				Mjup = cons.M_jup.cgs.value
 				# compute from K
@@ -1369,7 +1369,7 @@ def planet_props(star_sample, juliet_samples, connect_rho=False,mps=False,smf=1.
 
 def planet_props_lc(star_sample, juliet_samples, connect_rho=False,mps=False,smf=1.4):
 	"""
-	Compute planet parameters from juliet planet fit posteriors and 
+	Compute planet parameters from juliet planet fit posteriors and
 	parsec stellar parameters posteriors - lc only.
 
 	Parameters:
@@ -1383,13 +1383,13 @@ def planet_props_lc(star_sample, juliet_samples, connect_rho=False,mps=False,smf
 	(to screen): Mp, Rp, a, Teq values
 	"""
 	#dp = pickle.load(open(juliet_samples))
-	# load the juliet planet fit posteriors	
+	# load the juliet planet fit posteriors
 	with open(juliet_samples, 'rb') as f:
 		dp = pickle.load(f, encoding = 'latin1')
 
 	# Check if the fit used the Espinoza 18 r1,r2 parametrization
 	if 'pu' in dp.keys():
-		# get the maximum planet-to-star radius ratio 
+		# get the maximum planet-to-star radius ratio
 		pu = dp['pu']
 		# get the smallest planet-to-star radius ratio
 		pl = dp['pl']
@@ -1416,12 +1416,12 @@ def planet_props_lc(star_sample, juliet_samples, connect_rho=False,mps=False,smf
 	age	 = ds['age']
 	# create indices array
 	I=np.arange(len(mstar))
-	# select indices 
+	# select indices
 	#I = np.where((age<5.3)&(mstar>1.2))[0]
-	# cut parameter arrays to I indices 
+	# cut parameter arrays to I indices
 	# (currently no effect as no filter on I)
 	mstar,rstar,rhostar,lstar,age = mstar[I],rstar[I],rhostar[I],lstar[I],age[I]
-	# get standard deviation of stellar masses	
+	# get standard deviation of stellar masses
 	devmstar = np.sqrt(np.var(mstar))
 	# add random gaussian noise to masses using std-dev and smf factor
 	mstar = mstar + np.random.normal(0,smf*devmstar,len(mstar))
@@ -1433,7 +1433,7 @@ def planet_props_lc(star_sample, juliet_samples, connect_rho=False,mps=False,smf
 	fms,ms1,ms2 = get_sum(mstar)
 	# get rounded values and decimal positions rounded to for error bars
 	ms1,t1 = trunc(ms1)
-	ms2,t2 = trunc(ms2) 
+	ms2,t2 = trunc(ms2)
 	# round median mass to maximum number of decimals kept for error bars
 	fms = trunc(fms,force=max(t1,t2))
 	# print rounded mass and error bars
@@ -1501,7 +1501,7 @@ def planet_props_lc(star_sample, juliet_samples, connect_rho=False,mps=False,smf
 		# convert period to seconds
 		P = dp['P_p'+str(plt)] * 24. * 3600.
 
-		# check if the scaled semi-major axis a/Rs was fitted		
+		# check if the scaled semi-major axis a/Rs was fitted
 		if 'a_p'+str(plt) in dp.keys():
 			# if yes obtain it from dict
 			a = dp['a_p'+str(plt)]
@@ -1539,7 +1539,7 @@ def planet_props_lc(star_sample, juliet_samples, connect_rho=False,mps=False,smf
 		else:
 			p = dp['p_p'+str(plt)]
 			b = dp['b_p'+str(plt)]
-			
+
 		# compute the orbital inclination
 		inc = np.arccos(b/a)
 
@@ -1567,7 +1567,7 @@ def planet_props_lc(star_sample, juliet_samples, connect_rho=False,mps=False,smf
 			else:
 				# shuffle all parsec indices
 				i2 = np.random.randint(len(rstar))
-			
+
 			# use the i-th planet posteriors and the random i2 star posteriors
 			# get the semi-major axis for this (i,i2) set
 			A  = a[i]*rstar[i2] * cons.R_sun.value / cons.au.value
@@ -1723,7 +1723,7 @@ def make_plot(syst,masses = [1.01,1.14,1.3],isopath=default_isopath,pars_path='p
 		parallax += 0.082
 		eparallax = eparallax * 10. / 7.
 
-	# Get distance from parallax (using random normal sampling for error)	
+	# Get distance from parallax (using random normal sampling for error)
 	diss = 1. / np.random.normal(parallax/1000.,eparallax/1000.,nsim)
 	print('\n\t D [pc] = ',np.mean(diss),' +/- ', np.sqrt(np.var(diss)))
 
@@ -1747,7 +1747,7 @@ def make_plot(syst,masses = [1.01,1.14,1.3],isopath=default_isopath,pars_path='p
 
 	# get mass, logT, logg for 1.14 mass, np.log10(6.7*1e9) age, 0.26 metallicity
 	# TODO why these values?
-	out =  get_vals(1.14, np.log10(6.7*1e9), 0.26, isopath=default_isopath,keys=['mass','logT','logg']) 
+	out =  get_vals(1.14, np.log10(6.7*1e9), 0.26, isopath=default_isopath,keys=['mass','logT','logg'])
 	#print(out['mass'],10**out['logT'],out['logg'],loggtoRs(out['logg'],out['mass']))
 	#print(gfd)
 
@@ -1789,7 +1789,7 @@ def make_plot(syst,masses = [1.01,1.14,1.3],isopath=default_isopath,pars_path='p
 		plot(teffs,rads)
 		# overplot (as scatter) the R and Teff computed with the broad array of ages
 		scatter(teffs2,rads2)
-	
+
 	# get the radius and Teff from the stellar posteriors
 	st,sr = samples['teff'],samples['rstar']
 	# plot the posteriors (save first 5000 points)
@@ -1802,5 +1802,3 @@ def make_plot(syst,masses = [1.01,1.14,1.3],isopath=default_isopath,pars_path='p
 	ylabel(r'R$_{\star}$ [R$_{\odot}$]')
 	# save the plot
 	savefig('test.pdf',dpi=300,bbox_inches='tight')
-
-

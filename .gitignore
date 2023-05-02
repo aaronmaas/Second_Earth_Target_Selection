@@ -1,0 +1,6 @@
+
+*.dat
+Code/.DS_Store
+Code/.ipynb_checkpoints/Test PARSEC-checkpoint.ipynb
+.DS_Store
+Code/PARSEC_2/parsec.pkl
