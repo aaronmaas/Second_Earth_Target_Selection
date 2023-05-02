@@ -774,7 +774,7 @@ def get_teq(L,e,a,A=0.,beta=0.5,eps=1.):
 	# comupte and return equilibrium temperature
 	return (T0*(eff * L / (a*a))**(1./4.)) * (1. - e*e*1./16. - e*e*e*e*15./1024.)
 
-def runit(obname,isopath=default_isopath, fehfree=False, pars_path='pars/'):
+def runit(obname,isopath=default_isopath, fehfree=False, pars_path='pars/', stepnumber = 10000):
 	"""
 	Main function to compute stellar parameters
 
@@ -783,6 +783,7 @@ def runit(obname,isopath=default_isopath, fehfree=False, pars_path='pars/'):
 	isopath (str): filepath to isochrones
 	fehfree (boolean): whether to recompute Fe/H from isochrones
 	par_path (str): path to stellar files
+	stepnumber: Numbers of steps in the MCMC
 
 	Returns:
 	(to screen and pkl file): imass, age, mass, Teff, logg, radius, rho, Av,
@@ -916,10 +917,31 @@ def runit(obname,isopath=default_isopath, fehfree=False, pars_path='pars/'):
 	# Instantiate the emcee sampler
 	sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(data, error))
 	# iterate the mcmc over 10000 iterations
-	sampler.run_mcmc(pos, 10000)
+	sampler.run_mcmc(pos, stepnumber, progress = True)
+	
+	
+	fig, axes = plt.subplots(3, figsize=(10, 7), sharex=True)
+	samples = sampler.get_chain()
+	labels = ["Age", "Mass", "AV"]
+	for i in range(ndim):
+    		ax = axes[i]
+    		ax.plot(samples[:, :, i], "k", alpha=0.3)
+    		ax.set_xlim(0, len(samples))
+    		ax.set_ylabel(labels[i])
+    		ax.yaxis.set_label_coords(-0.1, 0.5)
+
+	axes[-1].set_xlabel("step number");
+	fig.savefig(pars_path+obname+"_walker_out.png")
+	plt.show()
+	
+	burnIn = input("Please Enter BurnIn phase (previous steps in chain get discarded): ") 
+	burnIn = int(burnIn) 
+	
 	# get the results, discarding first 50 chains (burn-in?)
-	samples = sampler.chain[:, 50:, :].reshape((-1, ndim))
+	samples = sampler.chain[:, burnIn:, :].reshape((-1, ndim))
 	print(np.shape(samples))
+	
+	
 
 	# create and save corner plots of the mcmc results
 	if feh_free:
