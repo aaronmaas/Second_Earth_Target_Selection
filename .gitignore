@@ -1,6 +1,9 @@
 
 *.dat
 Code/.DS_Store
-Code/.ipynb_checkpoints/Test PARSEC-checkpoint.ipynb
+Code/PARSEC/.ipynb_checkpoints/Test PARSEC-checkpoint.ipynb
 .DS_Store
-Code/PARSEC_2/parsec.pkl
+Code/PARSEC/PARSEC_2/parsec.pkl
+Code/ZASPE/Spectra/ 
+Code/ZASPE/final_grid/ 
+
