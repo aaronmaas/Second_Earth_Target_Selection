@@ -18,74 +18,33 @@ def create_notebook(star_name, directory_name):
     nb.cells = []
     
     #
-    header_cell = nbf.v4.new_markdown_cell(source=f"# Analysis of {star_name} Spectra")
+    header_cell = nbf.v4.new_markdown_cell(source=f"## Analysis of {star_name} Spectra")
     nb.cells.append(header_cell)
     
     # Add a Markdown cell with the description for the first section
-    header01_cell = nbf.v4.new_markdown_cell(source=f"""## Cleaning and Plotting data""")
-    nb.cells.append(header01_cell)
-    
-    description1_cell = nbf.v4.new_markdown_cell(source="In this step, we will plot all available data for the Star and also look at the Lomb Scargle Periodogram to identfy possible RV signals due to planets, companions stars or mag activity. Before this is done the blaze function is fitted to the original blaze uncorrected spectra. Please check if the provided targetname and spectra directory are correct.")
+    description1_cell = nbf.v4.new_markdown_cell(source="In this step, we will plot all available data for the Star. Please check if the provided targetname and spectra directory are correct.")
     nb.cells.append(description1_cell)
     
     code_cell0 = nbf.v4.new_code_cell(source=f"""star_name = '{star_name}'
-directory_name = '{directory_name}'""")
-    nb.cells.append(code_cell0) 
-    
-    header001_cell = nbf.v4.new_markdown_cell(source=f"## Calculate wavelength calibration from Polynomials")
-    nb.cells.append(header001_cell)
-    
-    code000_cell = nbf.v4.new_code_cell(source="""     
-from funcs import collect_fits_files, separate_fits_files
-    
-fits_files = collect_fits_files(directory_name,extension="A.fits")
-fits_files, ccf_files = separate_fits_files(fits_files)
-    
-from funcs import calculate_wavelengths 
-
-wavelengths = calculate_wavelengths(fits_files, directory_name)
-observed_wavelengths = wavelengths     
+directory_name = '{directory_name}'
     """)
-    nb.cells.append(code000_cell) 
-    
-    header002_cell = nbf.v4.new_markdown_cell(source=f"""### Apply the blaze correction by fitting a Polynomial to Blaze Uncorrected Spectra""") 
-    nb.cells.append(header002_cell) 
-    
-    code001_cell = nbf.v4.new_code_cell(source="""   
-from funcs import apply_blaze_correction
-
-discarded_nights = apply_blaze_correction(observed_wavelengths,fits_files,ccf_files,directory_name)""")
-    nb.cells.append(code001_cell)
-    
+    nb.cells.append(code_cell0) 
     # Add code cells and Markdown cells for the first section
     code_cell = nbf.v4.new_code_cell(source="""
-#remove nights to be discarded
+from funcs import collect_fits_files
 import numpy as np
-if len(discarded_nights) != 0:
-    wavelenghts = np.delete(wavelengths,discarded_nights,axis = 0)
-    fits_files = [fits_file for i, fits_file in enumerate(fits_files) if i not in discarded_nights]
-    ccf_files = [ccf_file for i, ccf_file in enumerate(ccf_files) if i not in discarded_nights]  
-    
-    
+
 #collect all fits files in the given directory
 fits_files = collect_fits_files(directory_name, extension = 'blaze_correction.fits')
     """)
+
     nb.cells.append(code_cell)
-    
-    header003_cell = nbf.v4.new_markdown_cell(source=f"### Plot the blaze corrected spectra") 
-    nb.cells.append(header003_cell) 
-    
-    description01_cell = nbf.v4.new_markdown_cell(source="The the step takes long due to extensive plotting. The .png files are stored in Plots/star_name_observer_night.png. The star name is obtained from simbad. Default is Gliese catalog, if not available it will use Henry Draper and otherwise Tess Input. \\ You do not have to run the next 2 cells as it takes long. However, if you are interested in how the spectra look, you might want to take a peak.")
-    nb.cells.append(description01_cell)
-    
-    
     code02_cell = nbf.v4.new_code_cell(source=f"""
 from funcs import plot_arrays, query_tic_name,query_gliese_name,query_HD_name, extract_target_info, extract_target_info_astropy
 import matplotlib.pyplot as plt
 from astropy.io import fits 
 from tqdm.notebook import tqdm
 from time import sleep
-import re
 
 for i in tqdm(range(len(fits_files))): 
     spectrum = fits.getdata(fits_files[i])
@@ -104,17 +63,18 @@ for i in tqdm(range(len(fits_files))):
         target_name = query_tic_name(t1) # try to get TIC id
       
       
-    #make sure there is no whitespaces in the target_name
-    pattern = re.compile(r'\s+')
-    target_name = re.sub(pattern, '', target_name)
-    
     file_name = target_name + observed_night + ".png"
-    save_dir = "Plots/" + target_name
     
+    
+    
+    save_dir = "Plots/" + target_name
     plot_arrays(flux,wavelength,save_dir=save_dir, save_filename=file_name)
     
-    sleep(3)""")
+    sleep(3)
+    """)
     nb.cells.append(code02_cell)
+    
+    
     
     
     code03_cell = nbf.v4.new_code_cell(source=f"""
@@ -122,36 +82,12 @@ for i in tqdm(range(len(fits_files))):
 #add the file you intend to show
 example_file = save_dir + "/" + file_name
 from IPython.display import display, Image
-display(Image(filename=example_file))""")
+display(Image(filename='example_file'))
+
+    """)
     nb.cells.append(code03_cell)
     
-    
-    header004_cell = nbf.v4.new_markdown_cell(source=f"### RV Analyis") 
-    nb.cells.append(header004_cell) 
-    
-    code04_cell = nbf.v4.new_code_cell(source=f"""
-from funcs import get_RV_BJD
-#obtain RV, RV uncertainty and BJD from the CCFs 
-rv, rv_err, bjd = get_RV_BJD(ccf_files)""")
-    nb.cells.append(code04_cell)
-    
-    code05_cell = nbf.v4.new_code_cell(source=f"""
-#plotting the RV variation
-from funcs import plot_rvs
 
-save_dir = 'Plots/' + star_name 
-file_name = star_name + "_RV_variation.png"
-plot_rvs(rv,rv_err/1000, bjd,save_dir, file_name) """)
-    nb.cells.append(code05_cell)
-    
-    code06_cell = nbf.v4.new_code_cell(source=f"""
-#plotting the LS Periodogram
-from funcs import plot_lomb_scargle
-
-file_name = star_name + "_Lomb_Scargle.png"
-plot_lomb_scargle(bjd, rv, rv_err/1000, save_dir= save_dir, save_filename=file_name)""")
-    nb.cells.append(code06_cell)
-    
     # Add a Markdown cell with the header for the first section
     header1_cell = nbf.v4.new_markdown_cell(source="## Combine and Align Spectra")
     nb.cells.append(header1_cell)
@@ -179,13 +115,13 @@ from funcs import plot_fluxes, plot_median_spectrum, interpolate_flux, get_wavel
 filelist = fits_files
 
 #get observed wavelength, flux and eflux; extract RV and calculate corrected wavelength
-wave, flux, eflux, RV, BERV, wave_corr, combined_orders = get_wavelength_flux_RV(filelist, ceres = False)
+wave, flux, eflux, RV, wave_corr, combined_orders = get_wavelength_flux_RV(filelist, ceres = False)
 
 #get reference wavelength from first observation night 
 wave_ref_corr = wave[0] / (1 + RV[0] / c_km) 
 
 #interpolate flux at corrected wavelength and on the corrected wavelegnths reference
-flux_interp = interpolate_flux(wave, flux, wave_ref_corr, RV, BERV)
+flux_interp = interpolate_flux(wave, flux, wave_ref_corr, RV)
 
 #median flux for specific order
 flux_median = np.median(flux_interp, axis=0)
@@ -196,8 +132,9 @@ plot_fluxes(wave_corr, flux, norder)
 plot_median_spectrum(wave_ref_corr, flux_median+3000, norder)   
 
 #save the spectrum as txt file for ZASPE
-save_directory = "Spectra/" + star_name + "/" + star_name + "_RV_method.txt" 
+save_directory = "/" + star_name + "/" + star_name + "_RV_method.txt" 
 save_spectrum_as_text(combined_orders, wave_ref_corr, flux_median, save_directory)
+
     """)
     nb.cells.append(code_cell22)
     
@@ -230,7 +167,8 @@ combined_spectra = np.array(combined_spectra)
 spectrum = fits.getdata(fits_files[0])
 flux = spectrum[1,:]
 wavelength = spectrum[0,:]
-blaze_corrected_flux = spectrum[3,:]""")
+blaze_corrected_flux = spectrum[3,:]
+    """)
     nb.cells.append(code_cell21)
     
     code_cell3 = nbf.v4.new_code_cell(source=f"""
@@ -253,7 +191,9 @@ save_dir = "Spectra/" + star_name + "/"
 #Cross correlation method    
 file_name = star_name + "_CCM" + ".txt"
 
-store_spectrum_orders(combined_spectra[:,1],combined_spectra[:,2], save_dir = save_dir, file_name = file_name )""")
+store_spectrum_orders(combined_wavelength,combined_spectra, save_dir = save_dir, file_name = file_name )
+
+""")
     nb.cells.append(code_cell4)     
     
     
