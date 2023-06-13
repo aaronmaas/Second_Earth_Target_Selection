@@ -885,7 +885,7 @@ def plot_lomb_scargle(bjd,rv,rv_err, false_alarm_probability = 0.01 , save_dir =
     rv_variation = rv - np.mean(rv)
     reduced_bjd = bjd - np.min(bjd)
     
-    ls = LombScargle(reduced_bjd, rv_variation, rv_err)
+    ls = LombScargle(reduced_bjd, rv_variation, rv_err) #is that error
     frequency, power = ls.autopower()
     
     periods = 1/frequency

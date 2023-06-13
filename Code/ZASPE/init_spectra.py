@@ -196,8 +196,9 @@ plot_fluxes(wave_corr, flux, norder)
 plot_median_spectrum(wave_ref_corr, flux_median+3000, norder)   
 
 #save the spectrum as txt file for ZASPE
-save_directory = "Spectra/" + star_name + "/" + star_name + "_RV_method.txt" 
-save_spectrum_as_text(combined_orders, wave_ref_corr, flux_median, save_directory)
+save_directory = "Spectra/" + star_name 
+file_name = star_name + "_RV_method.txt"
+save_spectrum_as_text(combined_orders, wave_ref_corr, flux_median, save_directory, file_name)
     """)
     nb.cells.append(code_cell22)
     
@@ -225,22 +226,19 @@ for i in range(num_orders):
     combined_spectra.append(np.array(combined_spectrum))
 
 combined_spectra = np.array(combined_spectra)
-
-#get wavelength for plotting
-spectrum = fits.getdata(fits_files[0])
-flux = spectrum[1,:]
-wavelength = spectrum[0,:]
-blaze_corrected_flux = spectrum[3,:]""")
+""")
     nb.cells.append(code_cell21)
     
     code_cell3 = nbf.v4.new_code_cell(source=f"""
+
 %matplotlib notebook 
 
 import matplotlib.pyplot as plt 
 plt.xlabel(r"Wavelength $[A]$")
 plt.ylabel(r"Flux")
-for i in range(len(wavelength)):
-    plt.plot(wavelength[i], combined_spectra[:,2][i])
+for i in range(len(combined_spectra[:,1])):
+    plt.plot(combined_spectra[:,1][i], combined_spectra[:,2][i])
+
 """)
     nb.cells.append(code_cell3) 
     
