@@ -191,7 +191,7 @@ def apply_blaze_correction(observed_wavelengths,fits_files, ccf_files, output_di
     return np.asarray(discarded_nights)
 
 
-def get_RV_BJD(ccf_files):
+def get_RV_BJD(ccf_files,ceres = False):
      
     """ Function to get out of CCF files in HARPS acillary data the RV, RV uncertainty and BJD. 
     
@@ -219,10 +219,16 @@ def get_RV_BJD(ccf_files):
     #loop over nights 
     for night in range(num_nights): 
         
-        ccf_header = fits.getheader(ccf_files[night]) 
-        RV[night] = ccf_header['ESO DRS CCF RVC']
-        RV_error[night] = ccf_header['ESO DRS DVRMS']
-        BJD[night] = ccf_header["ESO DRS BJD"]
+        ccf_header = fits.getheader(ccf_files[night])
+        if ceres == True:
+            RV[night] = ccf_header['RV']
+            RV_error[night] = ccf_header['RV_E']
+            BJD[night] = ccf_header["BJD_OUT"]
+        
+        else:
+            RV[night] = ccf_header['ESO DRS CCF RVC']
+            RV_error[night] = ccf_header['ESO DRS DVRMS']
+            BJD[night] = ccf_header["ESO DRS BJD"]
     
     return RV, RV_error, BJD
 
@@ -319,6 +325,7 @@ def save_spectrum_as_text(order, wave_ref_corr, flux_median, save_dir, output_fi
     
     """
     os.makedirs(os.path.dirname(save_dir), exist_ok=True)
+    output_filename = save_dir + "/" + output_filename
     np.savetxt(output_filename, np.column_stack((np.ravel(order), np.ravel(wave_ref_corr), np.ravel(flux_median))), delimiter=' ')
 
 
@@ -522,13 +529,13 @@ def combine_spectra(nights, order, template, saturation_threshold=None, sigma=10
     # Calculate the median of the aligned spectra along the first axis (night axis)
     combined_spectrum = np.median(aligned_spectra, axis=0)
     
-    if target_name.startswith("TIC") == False:
-        target_name = query_tic_name(target_name)
+    #if target_name.startswith("TIC") == False:
+    #    target_name = query_tic_name(target_name)
         
-    target_name = target_name + 'order' + str(order) +'.fits'
+    #target_name = target_name + 'order' + str(order) +'.fits'
     
-    combined_hdulist = fits.PrimaryHDU(combined_spectrum)
-    combined_hdulist.writeto("Spectra/" + target_name, overwrite=True)
+    #combined_hdulist = fits.PrimaryHDU(combined_spectrum)
+    #combined_hdulist.writeto("Spectra/" + target_name, overwrite=True)
     
     spectra_order = np.ones(len(combined_spectrum))*order
     
@@ -849,7 +856,10 @@ def plot_rvs(rv,rv_err,bjd,save_dir=None, save_filename=None,ms = True):
     reduced_bjd = bjd - np.min(bjd)
     plt.errorbar(reduced_bjd,rv_variation,yerr = rv_err, marker = "s", linestyle = "None") 
     plt.xlabel("Time [days]")
-    plt.ylabel("RV variation [km/s]")
+    if ms == True:
+        plt.ylabel("RV variation [m/s]")
+    else:
+        plt.ylabel("RV variation [km/s]")
     
     if save_dir and save_filename:
         if not os.path.exists(save_dir):

@@ -35,7 +35,7 @@ from funcs import collect_fits_files
 import numpy as np
 
 #collect all fits files in the given directory
-fits_files = collect_fits_files(directory_name, extension = 'blaze_correction.fits')
+fits_files = collect_fits_files(directory_name)
     """)
 
     nb.cells.append(code_cell)
@@ -87,6 +87,37 @@ display(Image(filename='example_file'))
     """)
     nb.cells.append(code03_cell)
     
+    # Add a Markdown cell with the header for the first section
+    header001_cell = nbf.v4.new_markdown_cell(source="## RV Analysis")
+    nb.cells.append(header001_cell)
+    
+    code_cell0000 = nbf.v4.new_code_cell(source=f"""  
+from funcs import get_RV_BJD
+#obtain RV, RV uncertainty and BJD from the CCFs 
+rv, rv_err, bjd = get_RV_BJD(fits_files,ceres=True)
+    """)
+    nb.cells.append(code_cell0000)
+    
+        code_cell0001 = nbf.v4.new_code_cell(source=f"""  
+#plotting the RV variation
+from funcs import plot_rvs
+
+save_dir = 'Plots/' + star_name 
+file_name = star_name + "_RV_variation.png"
+plot_rvs(rv,rv_err/1000, bjd,save_dir, file_name) 
+    """)
+    nb.cells.append(code_cell0001)
+    
+        code_cell0002 = nbf.v4.new_code_cell(source=f"""  
+#plotting the LS Periodogram
+from funcs import plot_lomb_scargle
+
+file_name = star_name + "_Lomb_Scargle.png"
+plot_lomb_scargle(bjd, rv, rv_err/1000, save_dir= save_dir, save_filename=file_name)
+    """)
+    nb.cells.append(code_cell0002)
+    
+    
 
     # Add a Markdown cell with the header for the first section
     header1_cell = nbf.v4.new_markdown_cell(source="## Combine and Align Spectra")
@@ -115,13 +146,13 @@ from funcs import plot_fluxes, plot_median_spectrum, interpolate_flux, get_wavel
 filelist = fits_files
 
 #get observed wavelength, flux and eflux; extract RV and calculate corrected wavelength
-wave, flux, eflux, RV, wave_corr, combined_orders = get_wavelength_flux_RV(filelist, ceres = False)
+wave, flux, eflux, RV, BERV, wave_corr, combined_orders = get_wavelength_flux_RV(filelist, ceres = False)
 
 #get reference wavelength from first observation night 
 wave_ref_corr = wave[0] / (1 + RV[0] / c_km) 
 
 #interpolate flux at corrected wavelength and on the corrected wavelegnths reference
-flux_interp = interpolate_flux(wave, flux, wave_ref_corr, RV)
+flux_interp = interpolate_flux(wave, flux, wave_ref_corr, RV, BERV)
 
 #median flux for specific order
 flux_median = np.median(flux_interp, axis=0)
@@ -132,9 +163,9 @@ plot_fluxes(wave_corr, flux, norder)
 plot_median_spectrum(wave_ref_corr, flux_median+3000, norder)   
 
 #save the spectrum as txt file for ZASPE
-save_directory = "/" + star_name + "/" + star_name + "_RV_method.txt" 
-save_spectrum_as_text(combined_orders, wave_ref_corr, flux_median, save_directory)
-
+save_directory = "Spectra/" + star_name 
+file_name = star_name + "_RV_method.txt"
+save_spectrum_as_text(combined_orders, wave_ref_corr, flux_median, save_directory, file_name)
     """)
     nb.cells.append(code_cell22)
     
@@ -162,23 +193,19 @@ for i in range(num_orders):
     combined_spectra.append(np.array(combined_spectrum))
 
 combined_spectra = np.array(combined_spectra)
-
-#get wavelength for plotting
-spectrum = fits.getdata(fits_files[0])
-flux = spectrum[1,:]
-wavelength = spectrum[0,:]
-blaze_corrected_flux = spectrum[3,:]
-    """)
+""")
     nb.cells.append(code_cell21)
     
     code_cell3 = nbf.v4.new_code_cell(source=f"""
+
 %matplotlib notebook 
 
 import matplotlib.pyplot as plt 
 plt.xlabel(r"Wavelength $[A]$")
 plt.ylabel(r"Flux")
-for i in range(len(wavelength)):
-    plt.plot(wavelength[i], combined_spectra[:,2][i])
+for i in range(len(combined_spectra[:,1])):
+    plt.plot(combined_spectra[:,1][i], combined_spectra[:,2][i])
+
 """)
     nb.cells.append(code_cell3) 
     
@@ -191,9 +218,7 @@ save_dir = "Spectra/" + star_name + "/"
 #Cross correlation method    
 file_name = star_name + "_CCM" + ".txt"
 
-store_spectrum_orders(combined_wavelength,combined_spectra, save_dir = save_dir, file_name = file_name )
-
-""")
+store_spectrum_orders(combined_spectra[:,1],combined_spectra[:,2], save_dir = save_dir, file_name = file_name )""")
     nb.cells.append(code_cell4)     
     
     
