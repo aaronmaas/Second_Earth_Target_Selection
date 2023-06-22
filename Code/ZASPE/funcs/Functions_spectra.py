@@ -904,6 +904,7 @@ def plot_lomb_scargle(bjd,rv,rv_err, false_alarm_probability = 0.01 , save_dir =
     plt.plot(periods, power, label = "Lomb Scargle Periodogram") 
     x_fa = np.linspace(np.min(periods),np.max(periods),100)
     plt.plot(x_fa,np.ones(len(x_fa)) *false_alarm, "--", label = "{:2f}-False alarm probability".format(false_alarm))
+    plt.xscale("log")
     plt.text(np.max(periods)/3, np.max(power), "Period = {:.2f} d".format(best_period)) 
     plt.xlabel("Time [days]")
     plt.ylabel("Power")
