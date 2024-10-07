@@ -2,9 +2,9 @@
 
 This repository contains the neccesarry modules and methods to excess all results from following work in Progress:
 
-1. Maas, A. J. (2023).  *Spectral Frontier: Exploring the Rainbow of Possibilities
+1. *Spectral Frontier: Exploring the Rainbow of Possibilities
 Target Selection Pipeline in Search of Earth 2.0*
-2. Maas, A. J. (2023) *Spectral Frontier: Exploring the Rainbow of Possibilities
+2. *Spectral Frontier: Exploring the Rainbow of Possibilities
 Pipeline revisited - Activity set the limits in Search of Earth2.0* 
 
 Atm the target selection pipeline is focused on combining and alining spectra. All methods for these operations can be found in
